@@ -16,6 +16,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { Loader2, Mail } from "lucide-react";
 import { IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export function LoginForm({
   className,
@@ -126,9 +127,9 @@ export function LoginForm({
             </Button>
             <FieldDescription className="text-center">
               Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
+              <Link href="/registro" className="underline underline-offset-4">
                 Sign up
-              </a>
+              </Link>
             </FieldDescription>
           </Field>
         </FieldGroup>

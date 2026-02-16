@@ -147,7 +147,7 @@ export default function HomePage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <div className="flex items-center gap-4">
               {isAuthenticated ? (
                 // ✅ Si está logueado, mostrar Dashboard
@@ -186,7 +186,15 @@ export default function HomePage() {
       <main className="max-w-screen-xl mx-auto px-6">
         {/* --- HERO SECTION --- */}
         <section className="pt-12 pb-16 flex flex-col items-center text-center">
-          <motion.div {...fadeIn}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut" as const,
+            }}
+          >
             <Badge
               variant="outline"
               className="mb-8 px-4 py-1.5 text-[10px] uppercase tracking-[0.2em] font-black border-border/80 rounded-full bg-muted/30"

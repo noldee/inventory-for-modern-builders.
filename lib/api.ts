@@ -48,6 +48,7 @@ export interface Categoria {
   id: number;
   nombre: string;
   descripcion: string;
+  productos?: any[];
 }
 export type CategoriaCreate = Omit<Categoria, "id">;
 

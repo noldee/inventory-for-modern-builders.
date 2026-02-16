@@ -40,7 +40,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // ✅ Limpia el store de Zustand
     logout();
     // ✅ Redirige al login
-    router.push('/login');
+    router.push("/login");
   };
 
   const data = {

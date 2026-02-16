@@ -39,13 +39,13 @@ import {
 const productSchema = z.object({
   sku: z.string().min(1, "El SKU es obligatorio"),
   nombre: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
-  descripcion: z.string().optional().default(""),
-  precioCompra: z.coerce.number().min(0, "Mínimo 0"),
-  precioVenta: z.coerce.number().min(0.01, "El precio de venta es requerido"),
-  stockActual: z.coerce.number().int().min(0, "No puede ser negativo"),
-  stockMinimo: z.coerce.number().int().min(0, "Mínimo 0"),
-  unidadMedida: z.string().min(1, "La unidad es requerida"),
-  ubicacion: z.string().optional().default(""),
+  descripcion: z.string().default(""), // Quitamos el .optional() para evitar el undefined
+  precioCompra: z.coerce.number().min(0),
+  precioVenta: z.coerce.number().min(0.01),
+  stockActual: z.coerce.number().int().min(0),
+  stockMinimo: z.coerce.number().int().min(0),
+  unidadMedida: z.string().min(1),
+  ubicacion: z.string().default(""), // Quitamos el .optional()
   categoria: z.object({
     id: z.coerce.number().min(1, "Selecciona una categoría"),
   }),
@@ -54,7 +54,6 @@ const productSchema = z.object({
   }),
   activo: z.boolean().default(true),
 });
-
 type ProductFormData = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
@@ -85,7 +84,7 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
     reset,
     formState: { errors },
   } = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       sku: "",
       nombre: "",
@@ -97,8 +96,8 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
       unidadMedida: "unidad",
       ubicacion: "",
       activo: true,
-      categoria: { id: 0 },
-      proveedor: { id: 0 },
+      categoria: { id: 0 }, // Asegúrate de que no sea null
+      proveedor: { id: 0 }, // Asegúrate de que no sea null
     },
   });
 
@@ -134,11 +133,15 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
         : productosAPI.crear(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["productos"] });
-      toast.success(isEditMode ? "Producto actualizado" : "Producto creado con éxito");
+      toast.success(
+        isEditMode ? "Producto actualizado" : "Producto creado con éxito",
+      );
       onSuccess();
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Error al procesar la solicitud");
+      toast.error(
+        error.response?.data?.message || "Error al procesar la solicitud",
+      );
     },
   });
 
@@ -159,19 +162,27 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
             placeholder="Ej: Taladro Percutor Inalámbrico 18V"
           />
           {errors.nombre && (
-            <p className="text-xs text-red-500 font-bold italic">{errors.nombre.message}</p>
+            <p className="text-xs text-red-500 font-bold italic">
+              {errors.nombre.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-black uppercase text-slate-500 italic">Código SKU</Label>
+          <Label className="text-xs font-black uppercase text-slate-500 italic">
+            Código SKU
+          </Label>
           <Input
             {...register("sku")}
             disabled={isEditMode}
             className="h-11 rounded-xl bg-slate-100 border-slate-200 font-mono tracking-wider"
             placeholder="SKU-000-000"
           />
-          {errors.sku && <p className="text-xs text-red-500 font-bold">{errors.sku.message}</p>}
+          {errors.sku && (
+            <p className="text-xs text-red-500 font-bold">
+              {errors.sku.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -187,42 +198,58 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
 
         {/* SECCIÓN 2: CATEGORIZACIÓN */}
         <div className="space-y-2">
-          <Label className="text-xs font-black uppercase text-slate-500 italic">Categoría</Label>
+          <Label className="text-xs font-black uppercase text-slate-500 italic">
+            Categoría
+          </Label>
           <Select
             value={categoryValue > 0 ? categoryValue.toString() : ""}
-            onValueChange={(val) => setValue("categoria.id", Number(val), { shouldValidate: true })}
+            onValueChange={(val) =>
+              setValue("categoria.id", Number(val), { shouldValidate: true })
+            }
           >
             <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-200 shadow-sm">
               <SelectValue placeholder="Seleccionar categoría..." />
             </SelectTrigger>
             <SelectContent>
               {categorias.map((c) => (
-                <SelectItem key={c.id} value={c.id.toString()}>{c.nombre}</SelectItem>
+                <SelectItem key={c.id} value={c.id.toString()}>
+                  {c.nombre}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {errors.categoria?.id && (
-            <p className="text-[10px] text-red-500 font-black uppercase">{errors.categoria.id.message}</p>
+            <p className="text-[10px] text-red-500 font-black uppercase">
+              {errors.categoria.id.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-black uppercase text-slate-500 italic">Proveedor Principal</Label>
+          <Label className="text-xs font-black uppercase text-slate-500 italic">
+            Proveedor Principal
+          </Label>
           <Select
             value={providerValue > 0 ? providerValue.toString() : ""}
-            onValueChange={(val) => setValue("proveedor.id", Number(val), { shouldValidate: true })}
+            onValueChange={(val) =>
+              setValue("proveedor.id", Number(val), { shouldValidate: true })
+            }
           >
             <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-200 shadow-sm">
               <SelectValue placeholder="Seleccionar proveedor..." />
             </SelectTrigger>
             <SelectContent>
               {proveedores.map((p) => (
-                <SelectItem key={p.id} value={p.id.toString()}>{p.nombre}</SelectItem>
+                <SelectItem key={p.id} value={p.id.toString()}>
+                  {p.nombre}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {errors.proveedor?.id && (
-            <p className="text-[10px] text-red-500 font-black uppercase">{errors.proveedor.id.message}</p>
+            <p className="text-[10px] text-red-500 font-black uppercase">
+              {errors.proveedor.id.message}
+            </p>
           )}
         </div>
 
@@ -233,7 +260,9 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
           </Label>
           <Select
             value={unitValue}
-            onValueChange={(val) => setValue("unidadMedida", val, { shouldValidate: true })}
+            onValueChange={(val) =>
+              setValue("unidadMedida", val, { shouldValidate: true })
+            }
           >
             <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-slate-200">
               <SelectValue placeholder="Unidad..." />
@@ -263,7 +292,9 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
       {/* SECCIÓN 4: PANEL DE CONTROL DE STOCK Y PRECIOS (Visualmente destacado) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-900 p-6 rounded-[2rem] shadow-xl">
         <div className="space-y-2">
-          <Label className="text-[10px] font-black uppercase text-blue-400 tracking-widest">P. Compra ($)</Label>
+          <Label className="text-[10px] font-black uppercase text-blue-400 tracking-widest">
+            P. Compra ($)
+          </Label>
           <Input
             type="number"
             step="0.01"
@@ -272,7 +303,9 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">P. Venta ($)</Label>
+          <Label className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">
+            P. Venta ($)
+          </Label>
           <Input
             type="number"
             step="0.01"
@@ -291,7 +324,9 @@ export function ProductForm({ producto, onSuccess }: ProductFormProps) {
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-black uppercase text-orange-400 tracking-widest italic">Stock Mínimo</Label>
+          <Label className="text-[10px] font-black uppercase text-orange-400 tracking-widest italic">
+            Stock Mínimo
+          </Label>
           <Input
             type="number"
             {...register("stockMinimo")}
